@@ -39,7 +39,6 @@ namespace ClassicUO.Game.UI
         protected virtual void OnTextChanged()
         {
         }
-
         public string InsertString(string c)
         {
             if (CaretIndex < 0)
@@ -54,22 +53,28 @@ namespace ClassicUO.Game.UI
 
             string text = Text.Insert(CaretIndex, c);
             int count = c.Length;
-
+            int countd = 0;
+            bool pd = false;
             if (MaxLines > 0)
             {
-                var newlines = GetLinesCharsCount(text);
-
+                int[] newlines = GetLinesCharsCount(text);
                 if (newlines.Length > MaxLines)
                 {
-                    count = 0;
-
+                    pd = true;
+                    countd = 0;
                     for (int l = newlines.Length - 1; l >= MaxLines; --l)
-                        count += newlines[l];
+                    {
+                        countd += newlines[l];
+                    }
                     c = text;
+                    if (CaretIndex + count < text.Length)
+                    {
+                        pd = false;
+                    }
 
-                    text = text.Remove(Math.Min(Math.Max(0, text.Length - 1), text.Length - count));
+                    text = text.Remove(Math.Min(Math.Max(0, text.Length - 1), text.Length - countd));
                     c = c.Length > text.Length ? c.Substring(text.Length) : null;
-                    if (c != null) count -= c.Length;
+                    if (c != null) countd -= c.Length;
                 }
                 else
                     c = null;
@@ -77,11 +82,56 @@ namespace ClassicUO.Game.UI
             else
                 c = null;
 
-            count = CaretIndex += count;
-            SetText(text, count);
+            count = CaretIndex += (pd ? countd : count);
 
-            return c;
+            SetText(text, count);
+            if (!pd)
+                return null;
+            else
+                return c;
         }
+        //public string InsertString(string c)
+        //{
+        //    if (CaretIndex < 0)
+        //        CaretIndex = 0;
+
+        //    if (CaretIndex > Text.Length)
+        //        CaretIndex = Text.Length;
+
+        //    if (MaxCharCount > 0)
+        //        if (Text.Length >= MaxCharCount)
+        //            return c;
+
+        //    string text = Text.Insert(CaretIndex, c);
+        //    int count = c.Length;
+
+        //    if (MaxLines > 0)
+        //    {
+        //        var newlines = GetLinesCharsCount(text);
+
+        //        if (newlines.Length > MaxLines)
+        //        {
+        //            count = 0;
+
+        //            for (int l = newlines.Length - 1; l >= MaxLines; --l)
+        //                count += newlines[l];
+        //            c = text;
+
+        //            text = text.Remove(Math.Min(Math.Max(0, text.Length - 1), text.Length - count));
+        //            c = c.Length > text.Length ? c.Substring(text.Length) : null;
+        //            if (c != null) count -= c.Length;
+        //        }
+        //        else
+        //            c = null;
+        //    }
+        //    else
+        //        c = null;
+
+        //    count = CaretIndex += count;
+        //    SetText(text, count);
+
+        //    return c;
+        //}
 
         public void SetText(string text, int newcaretpos)
         {
